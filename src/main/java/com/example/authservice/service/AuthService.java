@@ -58,6 +58,7 @@ public class AuthService {
                 password));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         String jwt = tokenProvider.generateToken(authentication);
 
         User user = authRepository.findByUsername(username)
@@ -83,7 +84,7 @@ public class AuthService {
     }
 
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> getByUsername(String username) {
         return authRepository.findByUsername(username);
     }
 
@@ -106,7 +107,7 @@ public class AuthService {
 
         String token = tokenHeader.substring(7);
         String username = tokenProvider.getUsernameFromToken(token);
-        User admin = findByUsername(username)
+        User admin = getByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
         if (!admin.getRoles().contains("ROLE_ADMIN")) {

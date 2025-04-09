@@ -6,15 +6,15 @@ import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,6 +26,13 @@ public class JwtTokenProvider {
     private int jwtExpiration;
     private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public JwtTokenProvider(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+
     public String generateToken(Authentication authentication) {
         log.info("Generating token for authentication: {}", authentication);
 
@@ -33,17 +40,17 @@ public class JwtTokenProvider {
         log.info("User principal: {}", userPrincipal);
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+        Date expiryDate = new Date(now.getTime() + jwtExpiration * 1000L); // Преобразование в миллисекунды
 
         log.info("Token details: Issued at {}, Expiration date {}", now, expiryDate);
 
-        // Извлечение ролей
+
         List<String> roles = userPrincipal.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        // Добавление ролей в токен
+
         Claims claims = Jwts.claims().setSubject(userPrincipal.getUsername());
         claims.put("roles", String.join(",", roles));
 
@@ -55,6 +62,8 @@ public class JwtTokenProvider {
                 .compact();
 
         log.info("Generated token: {}", token);
+
+        redisTemplate.opsForValue().set(token, userPrincipal.getUsername(), jwtExpiration, TimeUnit.SECONDS);
 
         return token;
     }

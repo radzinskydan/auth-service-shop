@@ -3,12 +3,10 @@ package com.example.authservice.controller;
 import com.example.authservice.entity.User;
 import com.example.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,11 +25,10 @@ public class UserController {
     }
 
     @Operation(summary = "Получить список всех пользователей")
-    @SecurityRequirement(name = "bearer-token")
     @GetMapping("/getAll")
-    public ResponseEntity<?> getUsers(@RequestHeader("Authorization") String tokenHeader) {
+    public ResponseEntity<?> getUsers() {
         try {
-            authService.validateAdminToken(tokenHeader);
+//            authService.validateAdminToken(tokenHeader);
             List<User> allUsers = authService.getAllUsers();
             return ResponseEntity.ok(allUsers);
         } catch (UsernameNotFoundException e) {

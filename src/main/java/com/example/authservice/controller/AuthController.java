@@ -19,10 +19,9 @@ public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService, JwtTokenProvider tokenProvider, AuthRepository authRepository) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -60,7 +59,7 @@ public class AuthController {
 //                token = token.substring(7);
 //                String username = tokenProvider.getUsernameFromToken(token);
 //
-//                User user = authRepository.findByUsername(username)
+//                User user = authService.getByUsername(username)
 //                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 //
 //                return ResponseEntity.ok(AuthResponse.builder()

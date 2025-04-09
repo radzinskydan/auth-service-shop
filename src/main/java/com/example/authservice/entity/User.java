@@ -35,4 +35,10 @@ public class User {
     @Transient
     @JsonDeserialize(contentUsing = SimpleGrantedAuthorityDeserializer.class)
     private List<SimpleGrantedAuthority> authorities;
+
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }
